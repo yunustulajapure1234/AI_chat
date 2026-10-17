@@ -3,31 +3,11 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Groq from "groq-sdk";
-import { tavily } from "@tavily/core";
+import { getAssistantReply, isValidChatMessages } from "./lib/chat.js";
 
 const folder = path.dirname(fileURLToPath(import.meta.url));
 const frontendFolder = path.join(folder, "frontend");
 const port = Number(process.env.PORT) || 3000;
-const model = "openai/gpt-oss-120b";
-
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "searchWeb",
-      description: "Search the web for current information.",
-      parameters: {
-        type: "object",
-        properties: {
-          query: { type: "string", description: "What to search for." },
-        },
-        required: ["query"],
-        additionalProperties: false,
-      },
-    },
-  },
-];
 
 const contentTypes = {
   "/": "text/html; charset=utf-8",
@@ -52,71 +32,6 @@ async function getRequestBody(request) {
   return JSON.parse(body);
 }
 
-async function searchWeb(query) {
-  if (!process.env.TAVILY_API_KEY) {
-    throw new Error("Web search is not configured. Add TAVILY_API_KEY to your .env file.");
-  }
-
-  const client = tavily({ apiKey: process.env.TAVILY_API_KEY });
-  const response = await client.search(query, { searchDepth: "basic", maxResults: 3 });
-
-  return response.results
-    .map(({ title, url, content }) => `${title}\n${url}\n${content.slice(0, 500)}`)
-    .join("\n\n");
-}
-
-async function getAssistantReply(chatMessages) {
-  if (!process.env.GROQ_API_KEY) {
-    throw new Error("AI is not configured. Add GROQ_API_KEY to your .env file.");
-  }
-
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-  const messages = [
-    {
-      role: "system",
-      content:
-        "You are Yunus ChatGPT, a helpful personal assistant. Use searchWeb when current information is needed and answer clearly.",
-    },
-    ...chatMessages.slice(-12),
-  ];
-
-  for (let turn = 0; turn < 4; turn += 1) {
-    const completion = await groq.chat.completions.create({
-      model,
-      messages,
-      tools,
-      tool_choice: "auto",
-    });
-    const assistantMessage = completion.choices[0]?.message;
-
-    if (!assistantMessage) {
-      throw new Error("The AI did not return a response. Please try again.");
-    }
-
-    if (!assistantMessage.tool_calls?.length) {
-      return assistantMessage.content || "I couldn't create a text response. Please try again.";
-    }
-
-    messages.push(assistantMessage);
-
-    for (const toolCall of assistantMessage.tool_calls) {
-      if (toolCall.function.name !== "searchWeb") {
-        throw new Error(`The AI requested an unsupported tool: ${toolCall.function.name}`);
-      }
-
-      const { query } = JSON.parse(toolCall.function.arguments);
-      const result = await searchWeb(query);
-      messages.push({
-        role: "tool",
-        tool_call_id: toolCall.id,
-        content: result || "No useful search results were found.",
-      });
-    }
-  }
-
-  throw new Error("The AI made too many search requests. Please try asking in a different way.");
-}
-
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
@@ -130,16 +45,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      if (
-        !Array.isArray(body.messages) ||
-        body.messages.length === 0 ||
-        body.messages.some(
-          (message) =>
-            !message ||
-            !["user", "assistant"].includes(message.role) ||
-            typeof message.content !== "string",
-        )
-      ) {
+      if (!isValidChatMessages(body.messages)) {
         await sendJson(response, 400, { error: "Please send a valid chat message." });
         return;
       }
