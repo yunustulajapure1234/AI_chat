@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Yunus ChatGPT is your AI assistant for ideas, answers, and everyday questions."
+    />
+    <meta name="theme-color" content="#f7f7f8" />
+    <title>Yunus ChatGPT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/script.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+          <a class="brand" href="/" aria-label="Yunus ChatGPT home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 36 36" fill="none">
+                <path d="M18 4.5 30 11.25v13.5L18 31.5 6 24.75v-13.5L18 4.5Z" />
+                <path d="m12 14 6-3.5 6 3.5v8l-6 3.5-6-3.5v-8Z" />
+                <path d="m12 14 6 3.5 6-3.5M18 17.5V25" />
+              </svg>
+            </span>
+            <span class="brand-name">yunus<span>chat</span></span>
+          </a>
+          <button class="icon-button sidebar-close" id="close-sidebar" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+
+        <button class="new-chat-button" id="new-chat">
+          <span class="plus-icon" aria-hidden="true">+</span>
+          <span>New chat</span>
+          <kbd>⌘ K</kbd>
+        </button>
+
+        <div class="sidebar-section">
+          <p class="section-label">YOUR SPACE</p>
+          <button class="nav-item active" id="home-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10.5 12 4l8 6.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-8Z" />
+              <path d="M9 20v-6h6v6" />
+            </svg>
+            <span>Home</span>
+          </button>
+        </div>
+
+        <div class="sidebar-section recent-section">
+          <div class="section-heading">
+            <p class="section-label">RECENT CHATS</p>
+            <button class="text-icon-button" id="clear-history" title="Clear chat history" aria-label="Clear chat history">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" /></svg>
+            </button>
+          </div>
+          <div class="history-list" id="history-list"></div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="profile-avatar">Y</div>
+          <div class="profile-copy">
+            <strong>Yunus</strong>
+            <span>Your personal AI</span>
+          </div>
+          <span class="online-dot" title="Ready"></span>
+        </div>
+      </aside>
+
+      <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <button class="icon-button menu-button" id="open-sidebar" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <div class="mobile-brand">yunus<span>chat</span></div>
+          <div class="model-picker">
+            <span class="model-status"></span>
+            <span>Yunus ChatGPT</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
+          </div>
+          <div class="topbar-link">
+            <span class="sparkle" aria-hidden="true">✳</span>
+            <span>Developed by Fisen Technologies</span>
+          </div>
+        </header>
+
+        <section class="chat-layout">
+          <div class="conversation" id="conversation" aria-live="polite">
+            <div class="welcome" id="welcome">
+              <div class="welcome-orbit" aria-hidden="true">
+                <div class="orbit orbit-one"></div>
+                <div class="orbit orbit-two"></div>
+                <div class="welcome-logo">
+                  <svg viewBox="0 0 48 48" fill="none">
+                    <path d="m24 5 16 9v20l-16 9-16-9V14l16-9Z" />
+                    <path d="m16 18 8-4.5 8 4.5v12l-8 4.5-8-4.5V18Z" />
+                    <path d="m16 18 8 4.5 8-4.5M24 22.5v12" />
+                  </svg>
+                </div>
+                <span class="orbit-star star-one">✦</span>
+                <span class="orbit-star star-two">✧</span>
+              </div>
+              <p class="eyebrow">A LITTLE HELP, A LOT OF IDEAS</p>
+              <h1>What’s on your<br /><span>mind today?</span></h1>
+              <p class="welcome-copy">Ask anything. Yunus ChatGPT is here to think it through with you.</p>
+
+              <div class="suggestion-grid">
+                <button class="suggestion-card" data-prompt="Explain a difficult topic to me in a simple way.">
+                  <span class="suggestion-icon icon-violet">✳</span>
+                  <span><strong>Make it make sense</strong><small>Explain a tricky topic simply</small></span>
+                  <span class="card-arrow">↗</span>
+                </button>
+                <button class="suggestion-card" data-prompt="Help me brainstorm a few creative ideas for a project.">
+                  <span class="suggestion-icon icon-orange">✦</span>
+                  <span><strong>Get creative</strong><small>Brainstorm something fresh</small></span>
+                  <span class="card-arrow">↗</span>
+                </button>
+                <button class="suggestion-card" data-prompt="Help me write a clear and friendly email.">
+                  <span class="suggestion-icon icon-green">↗</span>
+                  <span><strong>Write with me</strong><small>Turn a thought into a draft</small></span>
+                  <span class="card-arrow">↗</span>
+                </button>
+                <button class="suggestion-card" data-prompt="What are some useful things I can learn today?">
+                  <span class="suggestion-icon icon-blue">◎</span>
+                  <span><strong>Explore something</strong><small>Follow your curiosity</small></span>
+                  <span class="card-arrow">↗</span>
+                </button>
+              </div>
+            </div>
+            <div class="message-list" id="message-list"></div>
+          </div>
+
+          <div class="composer-area">
+            <form class="composer" id="chat-form">
+              <label class="sr-only" for="message-input">Message Yunus ChatGPT</label>
+              <textarea id="message-input" rows="1" placeholder="Message Yunus ChatGPT..." maxlength="4000"></textarea>
+              <div class="composer-toolbar">
+                <div class="composer-hint">
+                  <span class="hint-dot"></span>
+                  <span>Ready when you are</span>
+                </div>
+                <div class="composer-actions">
+                  <span class="character-count" id="character-count">0 / 4000</span>
+                  <button class="send-button" id="send-button" type="submit" aria-label="Send message" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-7 7 7-7 7 7" /></svg>
+                  </button>
+                </div>
+              </div>
+            </form>
+            <p class="disclaimer">Yunus ChatGPT can make mistakes. Check important information.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
