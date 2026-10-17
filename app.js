@@ -82,5 +82,5 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`Yunus ChatGPT is ready at http://localhost:${port}`);
+  console.log(`AVORA is ready at http://localhost:${port}`);
 });

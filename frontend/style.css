@@ -85,18 +85,20 @@ button {
   width: 33px;
   height: 33px;
   place-items: center;
-  border: 1px solid #ffffff2b;
-  border-radius: 11px;
-  background: linear-gradient(145deg, #9b8aff, #6e60d3);
-  box-shadow: 0 4px 14px #7868e83c;
+  border: 1px solid #c9aa7547;
+  border-radius: 10px;
+  background: #25231f;
+  box-shadow: 0 4px 14px #00000030;
 }
 
 .brand-mark svg {
-  width: 26px;
-  stroke: white;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.4;
+  width: 29px;
+  height: 29px;
+}
+
+.mobile-brand svg {
+  width: 29px;
+  height: 29px;
 }
 
 .brand-name,
@@ -104,12 +106,11 @@ button {
   font-family: "Manrope", sans-serif;
   font-size: 17px;
   font-weight: 800;
-  letter-spacing: -0.8px;
+  letter-spacing: 1.4px;
 }
 
-.brand-name span,
-.mobile-brand span {
-  color: #a99eff;
+.brand-name {
+  color: #f2e4cb;
 }
 
 .icon-button {
@@ -426,6 +427,14 @@ kbd {
 
 .mobile-brand {
   display: none;
+  align-items: center;
+  gap: 7px;
+  color: #302c26;
+}
+
+.mobile-brand svg {
+  width: 27px;
+  height: 27px;
 }
 
 .chat-layout {
@@ -489,19 +498,17 @@ kbd {
   width: 62px;
   height: 62px;
   place-items: center;
-  border: 1px solid #ffffff;
-  border-radius: 21px;
-  background: linear-gradient(145deg, #a69aff, #7666dc 70%, #6554cc);
-  box-shadow: 0 11px 24px #7766dc3d, inset 0 1px #ffffff74;
+  border: 1px solid #d9bd8b73;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #33302a, #191919);
+  box-shadow: 0 11px 24px #a7834a2b, inset 0 1px #ffffff16;
   transform: rotate(-5deg);
 }
 
 .welcome-logo svg {
-  width: 43px;
-  stroke: #fff;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.4;
+  width: 48px;
+  height: 48px;
+  transform: rotate(5deg);
 }
 
 .orbit-star {
@@ -1158,7 +1165,8 @@ h1 span {
   }
 
   .welcome-logo svg {
-    width: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .eyebrow {
@@ -1217,7 +1225,7 @@ h1 span {
   }
 
   .mobile-brand {
-    display: block;
+    display: flex;
     font-size: 15px;
   }
 
@@ -1321,7 +1329,8 @@ h1 span {
   }
 
   .welcome-logo svg {
-    width: 34px;
+    width: 37px;
+    height: 37px;
   }
 
   .eyebrow {

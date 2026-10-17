@@ -153,7 +153,7 @@ function addMessage(role, content, messageIndex = null) {
   const avatar = document.createElement("div");
   avatar.className = "message-avatar";
   avatar.setAttribute("aria-hidden", "true");
-  avatar.textContent = role === "assistant" ? "Y" : "U";
+  avatar.textContent = role === "assistant" ? "A" : "U";
 
   const body = document.createElement("div");
   body.className = "message-body";
@@ -212,11 +212,11 @@ function showError(message) {
 function showTyping() {
   const row = document.createElement("article");
   row.className = "message assistant";
-  row.setAttribute("aria-label", "Yunus ChatGPT is thinking");
+  row.setAttribute("aria-label", "AVORA is thinking");
 
   const avatar = document.createElement("div");
   avatar.className = "message-avatar";
-  avatar.textContent = "Y";
+  avatar.textContent = "A";
 
   const dots = document.createElement("div");
   dots.className = "typing-dots";
