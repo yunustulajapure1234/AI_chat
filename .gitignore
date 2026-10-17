@@ -1,4 +1,5 @@
 node_modules/
+frontend/app.bundle.js
 .env
 .env.*
 !.env.example

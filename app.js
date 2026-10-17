@@ -13,7 +13,7 @@ const contentTypes = {
   "/": "text/html; charset=utf-8",
   "/index.html": "text/html; charset=utf-8",
   "/style.css": "text/css; charset=utf-8",
-  "/script.js": "text/javascript; charset=utf-8",
+  "/app.bundle.js": "text/javascript; charset=utf-8",
 };
 
 async function sendJson(response, status, data) {

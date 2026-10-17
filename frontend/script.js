@@ -1,3 +1,5 @@
+import { renderMarkdown } from "./markdown.js";
+
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
 const sendButton = document.querySelector("#send-button");
@@ -31,6 +33,52 @@ function loadConversations() {
   }
 }
 
+async function copyText(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.textContent = "Copied";
+    window.setTimeout(() => {
+      button.textContent = button.dataset.copyLabel;
+    }, 1400);
+  } catch {
+    showError("Could not copy to clipboard. Check your browser permissions and try again.");
+  }
+}
+
+async function regenerateResponse(chat, messageIndex, row) {
+  if (waitingForReply || !chat || messageIndex !== chat.messages.length - 1) return;
+
+  waitingForReply = true;
+  updateInputState();
+  const typing = showTyping();
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: chat.messages.slice(0, messageIndex) }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "The response could not be regenerated.");
+    }
+    if (typeof data.reply !== "string" || !data.reply.trim()) {
+      throw new Error("The AI returned an empty response. Please try again.");
+    }
+
+    chat.messages[messageIndex].content = data.reply;
+    row.replaceWith(addMessage("assistant", data.reply, messageIndex));
+    saveConversations();
+  } catch (error) {
+    showError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+  } finally {
+    typing.remove();
+    waitingForReply = false;
+    updateInputState();
+  }
+}
+
 function saveConversations() {
   try {
     localStorage.setItem(storageKey, JSON.stringify(conversations));
@@ -59,8 +107,8 @@ function openConversation(id) {
   currentConversationId = id;
   welcome.hidden = chat.messages.length > 0;
   messageList.replaceChildren();
-  for (const message of chat.messages) {
-    addMessage(message.role, message.content);
+  for (const [index, message] of chat.messages.entries()) {
+    addMessage(message.role, message.content, index);
   }
   renderHistory();
   closeSidebar();
@@ -98,7 +146,7 @@ function renderHistory() {
   }
 }
 
-function addMessage(role, content) {
+function addMessage(role, content, messageIndex = null) {
   const row = document.createElement("article");
   row.className = `message ${role}`;
 
@@ -109,11 +157,47 @@ function addMessage(role, content) {
 
   const body = document.createElement("div");
   body.className = "message-body";
-  body.textContent = content;
-  row.append(avatar, body);
+  if (role === "assistant") {
+    body.innerHTML = renderMarkdown(content);
+  } else {
+    body.textContent = content;
+  }
+
+  if (role === "assistant") {
+    const contentColumn = document.createElement("div");
+    contentColumn.className = "assistant-content";
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+    actions.append(
+      createMessageAction("copy-response", "Copy response", "Copy"),
+      createMessageAction("regenerate-response", "Regenerate response", "Regenerate"),
+      createMessageAction("feedback-up", "Helpful response", "Helpful"),
+      createMessageAction("feedback-down", "Not helpful", "Not helpful"),
+    );
+    actions.dataset.messageIndex = messageIndex ?? "";
+    actions.querySelector('[data-action="regenerate-response"]').hidden =
+      messageIndex !== null && messageIndex !== currentConversation()?.messages.length - 1;
+    contentColumn.append(body, actions);
+    row.append(avatar, contentColumn);
+  } else {
+    row.append(avatar, body);
+  }
+
   messageList.append(row);
   scrollToBottom();
   return row;
+}
+
+function createMessageAction(action, label, text) {
+  const button = document.createElement("button");
+  button.className = "message-action";
+  button.type = "button";
+  button.dataset.action = action;
+  button.dataset.copyLabel = text;
+  button.setAttribute("aria-label", label);
+  button.title = label;
+  button.textContent = text;
+  return button;
 }
 
 function showError(message) {
@@ -209,7 +293,7 @@ async function sendMessage(text = input.value) {
     }
 
     chat.messages.push({ role: "assistant", content: data.reply });
-    addMessage("assistant", data.reply);
+    addMessage("assistant", data.reply, chat.messages.length - 1);
     saveConversations();
   } catch (error) {
     showError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
@@ -253,6 +337,43 @@ sidebarScrim.addEventListener("click", closeSidebar);
 
 document.querySelectorAll(".suggestion-card").forEach((card) => {
   card.addEventListener("click", () => sendMessage(card.dataset.prompt || ""));
+});
+
+messageList.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const row = button.closest(".message.assistant");
+  const chat = currentConversation();
+  if (!row || !chat) return;
+
+  if (button.dataset.action === "copy-code") {
+    const code = button.closest(".code-block")?.querySelector("code")?.textContent;
+    if (code) await copyText(code, button);
+    return;
+  }
+
+  if (button.dataset.action === "copy-response") {
+    const index = Number(button.closest(".message-actions").dataset.messageIndex);
+    const response = chat.messages[index]?.content;
+    if (response) await copyText(response, button);
+    return;
+  }
+
+  if (button.dataset.action === "regenerate-response") {
+    const index = Number(button.closest(".message-actions").dataset.messageIndex);
+    await regenerateResponse(chat, index, row);
+    return;
+  }
+
+  if (button.dataset.action === "feedback-up" || button.dataset.action === "feedback-down") {
+    const group = button.closest(".message-actions");
+    const wasSelected = button.getAttribute("aria-pressed") === "true";
+    group.querySelectorAll('[data-action^="feedback-"]').forEach((item) => {
+      item.setAttribute("aria-pressed", "false");
+    });
+    button.setAttribute("aria-pressed", String(!wasSelected));
+  }
 });
 
 document.addEventListener("keydown", (event) => {
